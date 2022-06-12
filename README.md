@@ -89,6 +89,9 @@ nano /var/lib/pgsql/13/data/pg_hba.conf
 ```sh
 host    all             all             0.0.0.0/0               ldap ldapserver=domain-host-ip ldapport=389 ldapprefix=""
 ```
+```sh
+systemctl restart postgresql-13
+```
 
 ## POSTGRESQL:
 Now we are setting the user that will create the roles and authorizations between postgresql' and AD from the users we have added to the database.
