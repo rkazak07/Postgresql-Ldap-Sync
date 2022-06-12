@@ -108,6 +108,10 @@ Now we are setting the user that will create the roles and authorizations betwee
  create role pggroup in role ldap_groups;
  grant CONNECT ON DATABASE postgres to pggroup;
  ```
+ Postgresql Database Ldap Login Control
+  ```sh
+ psql -h db-host-ip -U "ldapuser" -d postgres
+ ```
 
 ## CRONJOB:
 We need to create a cronjob so that the pg-ldap-sync.yaml file we created can pull the users added to the pggroup via AD in certain periods.
