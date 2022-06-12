@@ -114,7 +114,7 @@ Now we are setting the user that will create the roles and authorizations betwee
 
 ## CRONJOB:
 We need to create a cronjob so that the pg-ldap-sync.yaml file we created can pull the users added to the pggroup via AD in certain periods.
-# example:
+## Example:
 ```sh
  sudo yum -y install crontabs
  crontab -e
