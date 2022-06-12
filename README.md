@@ -33,7 +33,7 @@ Install Ruby:
 
 
 ## POSTGRESQL13:
-Postgresql içerisinde grup ve user'lar için rol ekliyoruz.
+We add roles for groups and users in Postgresql.
 ```sh
   su postgres
  ```
@@ -66,7 +66,7 @@ Run in modify-mode:
  
  
  ## CHECK:
- AD üzerinden alınan kullanıcıların Postgresql'e yazılıp yazılmadığını kontrol edelim. Aşağıdkai komutu çalıştırınca user'lar rollerde görünüyorsa başarıyla eklenmiştir.
+ Check whether the users taken from the active directory are written to Postgresql. If users appear in roles when you run the below command, they have been successfully added.
  ```sh
  su postgres
  ```
@@ -77,7 +77,7 @@ Run in modify-mode:
   \du
  ```
  
- ## LDAP TESTI:
+ ## LDAP TEST:
  ```sh
  ldapsearch -x -h ad-host-ip -D "pgadsync@domain.local" -W "(sAMAccountName=*)" -b "OU=pgusers,OU=Service_Users,OU=organization-unit,DC=domain,DC=local"  | grep    sAMAccountName
  ```
@@ -97,15 +97,15 @@ host    all             all             0.0.0.0/0               ldap ldapserver=
 ```
 
 ## POSTGRESQL13:
- şimdi db'ye eklediğimiz user'lardan postgresql' ile AD arasında rol ve yetkilendirmeleri oluşturacak olan user'ı ayarlıyoruz.
+Now we are setting the user that will create the roles and authorizations between postgresql' and AD from the users we have added to the database.
 ```sh
  create role "user1" superuser createdb createrole;
  ```
- Eğer user mevcutlardan oluşturacaksak yetkisini değiştiriyoruz.
+ If we are going to create a user from existing ones, we are changing its authority
  ```sh
  alter role "user1" superuser createdb createrole;
  ```
-AD üzerinden oluşturduğumuz pggroup'a postgres'e yetki vereceğiz.
+ We will authorize the pggroup we created via AD to postgres.
  ```sh
  drop role pggroup; 
  create role pggroup in role ldap_groups;
@@ -113,13 +113,13 @@ AD üzerinden oluşturduğumuz pggroup'a postgres'e yetki vereceğiz.
  ```
 
 ## CRONJOB:
-Oluşturduğumuz pg-ldap-sync.yaml dosyasını AD üzerinden pggroup'a eklenen userları belirli periyorlarda çekebilmesi için cronjob  oluşturmalıyız.
+We need to create a cronjob so that the pg-ldap-sync.yaml file we created can pull the users added to the pggroup via AD in certain periods.
 # example:
 ```sh
  sudo yum -y install crontabs
  crontab -e
  ```
-# Crontab'a pg-ldap-sync'i ve çalıştırma süresini belirtiyoruz.
+ We specify pg-ldap-sync and its runtime to the crontab.
  ```sh
  crontab -e
  ```
