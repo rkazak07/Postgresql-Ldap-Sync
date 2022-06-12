@@ -35,7 +35,7 @@ Install Ruby:
 ## POSTGRESQL13:
 Postgresql içerisinde grup ve user'lar için rol ekliyoruz.
 ```sh
-   su postgres
+  su postgres
  ```
   ```sh
    psql
@@ -68,8 +68,12 @@ Run in modify-mode:
  ## CHECK:
  AD üzerinden alınan kullanıcıların Postgresql'e yazılıp yazılmadığını kontrol edelim. Aşağıdkai komutu çalıştırınca user'lar rollerde görünüyorsa başarıyla eklenmiştir.
  ```sh
-  su postgres
-  psql
+ su postgres
+ ```
+ ```sh
+ psql
+ ```
+ ```sh
   \du
  ```
  
@@ -88,7 +92,9 @@ sAMAccountName: user2
 ```sh
 nano /var/lib/pgsql/13/data/pg_hba.conf
 ```
+```sh
 host    all             all             0.0.0.0/0               ldap ldapserver=domain-host-ip ldapport=389 ldapprefix=""
+```
 
 ## POSTGRESQL13:
  şimdi db'ye eklediğimiz user'lardan postgresql' ile AD arasında rol ve yetkilendirmeleri oluşturacak olan user'ı ayarlıyoruz.
