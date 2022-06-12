@@ -23,7 +23,7 @@ Install Ruby:
 ```sh
   yum install -y ruby rubygem-rake rubygems ruby-devel openldap-clients git wget tar curl make  rubygem-bigdecimal.x86_64 redhat-rpm-config libpq-devel.x86_64 gcc nano
   git clone https://github.com/rkazak07/Oracle-Linux8-Postgresql-13-ldap-sync.git
-  cd pg-ldap-sync
+  cd Oracle-Linux8-Postgresql-13-ldap-sync
   gem install bundler
   bundle install
   bundle exec rake install
