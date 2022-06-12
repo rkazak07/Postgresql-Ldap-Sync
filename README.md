@@ -44,7 +44,7 @@ We add roles for groups and users in Postgresql.
    create role ldap_users;
    ```
    ```sh
-   create role ldap_users;
+   create role ldap_groups;
    ```
    ```sh
   \du
@@ -96,7 +96,7 @@ nano /var/lib/pgsql/13/data/pg_hba.conf
 host    all             all             0.0.0.0/0               ldap ldapserver=domain-host-ip ldapport=389 ldapprefix=""
 ```
 
-## POSTGRESQL13:
+## POSTGRESQL:
 Now we are setting the user that will create the roles and authorizations between postgresql' and AD from the users we have added to the database.
 ```sh
  create role "user1" superuser createdb createrole;
