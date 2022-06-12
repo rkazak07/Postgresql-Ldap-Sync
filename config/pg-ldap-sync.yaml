@@ -1,0 +1,66 @@
+
+# With this sample config the distinction between LDAP-synchronized
+# groups/users from is done by the membership to ldap_user and
+# ldap_group. These two roles have to be defined manally before
+# pg_ldap_sync can run.
+
+# Connection parameters to LDAP server
+# see also: http://net-ldap.rubyforge.org/Net/LDAP.html#method-c-new
+ldap_connection:
+  host: ldap-domain.
+  port: 389
+  auth:
+    method: :simple
+    username: CN=pgadsync,OU=Service_Users,OU=organization-unit,DC=sample,DC=infra
+    password: 123123Aa
+#  encryption:
+ #   method: :simple_tls
+
+# Search parameters for LDAP users which should be synchronized
+ldap_users:
+  base: OU=pgusers,OU=Service_Users,OU=organization-unit,DC=sample,DC=infra
+  # LDAP filter (according to RFC 2254)
+  # defines to users in LDAP to be synchronized
+  # filter: (&(objectClass=person)(objectClass=organizationalPerson)(givenName=*)(sn=*)(sAMAccountName=*))
+  filter: (sAMAccountName=*)
+  # this attribute is used as PG role name
+  name_attribute: sAMAccountName
+  # lowercase name for use as PG role name
+  lowercase_name: true
+  # Add lowercase name *and* original name for use as PG role names (useful for migrating between case types)
+  bothcase_name: false
+
+# Search parameters for LDAP groups which should be synchronized
+ldap_groups:
+  base: OU=Service_Users,OU=organization-unit,DC=sample,DC=infraOU=Bib,DC=bib,DC=infra
+  filter: (cn=pggroup)
+  # this attribute is used as PG role name
+  name_attribute: cn
+  # lowercase name for use as PG role name
+  lowercase_name: false
+  # this attribute must reference to all member DN's of the given group
+  member_attribute: member
+
+# Connection parameters to PostgreSQL server
+# see also: http://rubydoc.info/gems/pg/PG/Connection#initialize-instance_method
+pg_connection:
+  host: postgresql-host
+  dbname: postgres
+  user: postgres
+  password: postgres
+
+pg_users:
+  # Filter for identifying LDAP generated users in the database.
+  # It's the WHERE-condition to "SELECT rolname, oid FROM pg_roles"
+  filter: oid IN (SELECT pam.member FROM pg_auth_members pam JOIN pg_roles pr ON pr.oid=pam.roleid WHERE pr.rolname='ldap_users')
+  # Options for CREATE RULE statements
+  create_options: LOGIN IN ROLE ldap_users
+
+pg_groups:
+  # Filter for identifying LDAP generated groups in the database.
+  # It's the WHERE-condition to "SELECT rolname, oid FROM pg_roles"
+  filter: oid IN (SELECT pam.member FROM pg_auth_members pam JOIN pg_roles pr ON pr.oid=pam.roleid WHERE pr.rolname='ldap_groups')
+  # Options for CREATE RULE statements
+  create_options: NOLOGIN IN ROLE ldap_groups
+  # grant_options:
+

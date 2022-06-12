@@ -1,0 +1,27 @@
+image: Visual Studio 2019
+
+init:
+  - set PATH=C:/Ruby%ruby_version%/bin;c:/Program Files/Git/cmd;c:/Windows/system32;C:/Windows/System32/WindowsPowerShell/v1.0
+  - set RUBYOPT=--verbose
+
+install:
+  - ver
+  - ruby --version
+  - gem --version
+  - gem install bundler --no-doc --conservative
+  - bundle install
+
+build_script:
+  - set PATH=C:/Program Files/PostgreSQL/%PGVER%/bin;%PATH%
+  - md temp
+  - icacls temp /grant Everyone:(OI)(CI)F /T
+
+test_script:
+  - bundle exec rake test
+
+environment:
+  matrix:
+    - ruby_version: "27-x64"
+      PGVER: 13
+    - ruby_version: "24"
+      PGVER: 10
