@@ -36,10 +36,18 @@ Install Ruby:
 Postgresql içerisinde grup ve user'lar için rol ekliyoruz.
 ```sh
    su postgres
+ ```
+  ```sh
    psql
+   ```
+   ```sh
    create role ldap_users;
+   ```
+   ```sh
    create role ldap_users;
-   \du
+   ```
+   ```sh
+  \du
  ```
  
  ## USAGE:
