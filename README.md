@@ -1,23 +1,3 @@
-[![Build Status](https://app.travis-ci.com/larskanis/pg-ldap-sync.svg?branch=master)](https://app.travis-ci.com/larskanis/pg-ldap-sync) [![Build status](https://ci.appveyor.com/api/projects/status/09xn9q5p64jbxtka/branch/master?svg=true)](https://ci.appveyor.com/project/larskanis/pg-ldap-sync/branch/master)
-
-# Use LDAP permissions in PostgreSQL
-
-* http://github.com/larskanis/pg-ldap-sync
-
-## DESCRIPTION:
-
-LDAP is often used for a centralized user and role management in an enterprise environment.
-PostgreSQL offers different authentication methods, like LDAP, SSPI, GSSAPI or SSL.
-However, for any method the user must already exist in the database, before the authentication can be used.
-There is currently no direct authorization of database users on LDAP.
-So roles and memberships has to be administered twice.
-
-This program helps to solve the issue by synchronizing users, groups and their memberships from LDAP to PostgreSQL.
-Access to LDAP is used read-only.
-`pg_ldap_sync` issues proper CREATE ROLE, DROP ROLE, GRANT and REVOKE commands to synchronize users and groups.
-
-It is meant to be started as a cron job.
-
 ## FEATURES:
 
 * Configurable per YAML config file
@@ -37,29 +17,35 @@ It is meant to be started as a cron job.
 
 Install Ruby:
 
-* on Windows: http://rubyinstaller.org
-* on Debian/Ubuntu: `apt-get install ruby libpq-dev`
-
-Install pg-ldap-sync and required dependencies:
-```sh
-  gem install pg-ldap-sync
-```
+* on Oracle-Linux8/Centos8/Rhel8/RockyLinux8: 
 
 ### Install from Git:
 ```sh
+  yum install -y ruby rubygem-rake rubygems ruby-devel openldap-clients git wget tar curl make  rubygem-bigdecimal.x86_64 redhat-rpm-config libpq-devel.x86_64 gcc nano
   git clone https://github.com/larskanis/pg-ldap-sync.git
   cd pg-ldap-sync
   gem install bundler
   bundle install
   bundle exec rake install
+  gem install json
+  which pg_ldap_sync
 ```
 
-## USAGE:
+
+## POSTGRESQL13:
+Postgresql içerisinde grup ve user'lar için rol ekliyoruz.
+```sh
+   su postgres
+   psql
+   create role ldap_users;
+   create role ldap_users;
+   \du
+ ```
+ 
+ ## USAGE:
 
 Create a config file based on
-[config/sample-config.yaml](https://github.com/larskanis/pg-ldap-sync/blob/master/config/sample-config.yaml)
-or even better
-[config/sample-config2.yaml](https://github.com/larskanis/pg-ldap-sync/blob/master/config/sample-config2.yaml)
+[config/pg-ldap-sync-config.yaml](https://github.com/rkazak07/Oracle-Linux8-Postgresql-13-ldap-sync/config/pg-ldap-sync.yaml)
 
 Run in test-mode:
 ```sh
@@ -69,20 +55,58 @@ Run in modify-mode:
 ```sh
   pg_ldap_sync -c my_config.yaml -vv
 ```
-
-## TEST:
-There is a small test suite in the `test` directory that runs against an internal LDAP server and a PostgreSQL server. Ensure `pg_ctl`, `initdb` and `psql` commands are in the `PATH` like so:
+ 
+ 
+ ## CHECK:
+ AD üzerinden alınan kullanıcıların Postgresql'e yazılıp yazılmadığını kontrol edelim. Aşağıdkai komutu çalıştırınca user'lar rollerde görünüyorsa başarıyla eklenmiştir.
+ ```sh
+  su postgres
+  psql
+  \du
+ ```
+ 
+ ## LDAP TESTI:
+ ```sh
+ ldapsearch -x -h ad-host-ip -D "pgadsync@domain.local" -W "(sAMAccountName=*)" -b "OU=pgusers,OU=Service_Users,OU=organization-unit,DC=domain,DC=local"  | grep    sAMAccountName
+ ```
+## EXAMPLE:
 ```sh
-  cd pg-ldap-sync
-  bundle install
-  PATH=$PATH:/usr/lib/postgresql/10/bin/ bundle exec rake test
+#filter: (sAMAccountName=*)
+sAMAccountName: user1
+sAMAccountName: user2
 ```
 
-## ISSUES:
+## PG_HBA.CONF EDIT:
+```sh
+nano /var/lib/pgsql/13/data/pg_hba.conf
+```
+host    all             all             0.0.0.0/0               ldap ldapserver=domain-host-ip ldapport=389 ldapprefix=""
 
-* There is currently no way to set certain user attributes in PG based on individual attributes in LDAP (expiration date etc.)
+## POSTGRESQL13:
+ şimdi db'ye eklediğimiz user'lardan postgresql' ile AD arasında rol ve yetkilendirmeleri oluşturacak olan user'ı ayarlıyoruz.
+```sh
+ create role "user1" superuser createdb createrole;
+ ```
+ Eğer user mevcutlardan oluşturacaksak yetkisini değiştiriyoruz.
+ ```sh
+ alter role "user1" superuser createdb createrole;
+ ```
+AD üzerinden oluşturduğumuz pggroup'a postgres'e yetki vereceğiz.
+ ```sh
+ drop role pggroup; 
+ create role pggroup in role ldap_groups;
+ grant CONNECT ON DATABASE postgres to pggroup;
+ ```
 
-
-## License
-
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+## CRONJOB:
+Oluşturduğumuz pg-ldap-sync.yaml dosyasını AD üzerinden pggroup'a eklenen userları belirli periyorlarda çekebilmesi için cronjob  oluşturmalıyız.
+# example:
+```sh
+ sudo yum -y install crontabs
+ crontab -e
+ ```
+# Crontab'a pg-ldap-sync'i ve çalıştırma süresini belirtiyoruz.
+ ```sh
+ crontab -e
+ ```
+ 
