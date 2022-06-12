@@ -35,11 +35,8 @@ Install Ruby:
 ## POSTGRESQL13:
 We add roles for groups and users in Postgresql.
 ```sh
-  su postgres
+   sudo -su postgres psql
  ```
-  ```sh
-   psql
-   ```
    ```sh
    create role ldap_users;
    ```
@@ -68,10 +65,7 @@ Run in modify-mode:
  ## CHECK:
  Check whether the users taken from the active directory are written to Postgresql. If users appear in roles when you run the below command, they have been successfully added.
  ```sh
- su postgres
- ```
- ```sh
- psql
+ sudo -su postgres psql
  ```
  ```sh
   \du
