@@ -87,7 +87,7 @@ sAMAccountName: user2
 nano /var/lib/pgsql/13/data/pg_hba.conf
 ```
 ```sh
-host    all             all             0.0.0.0/0               ldap ldapserver=domain-host-ip ldapport=389 ldapprefix=""
+host    all             all             0.0.0.0/0               ldap ldapserver=domain-host ldapport=389 ldapprefix=""  ldapsuffix="@domain.local" ldapscheme=ldap
 ```
 ```sh
 systemctl restart postgresql-13
