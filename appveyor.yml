@@ -22,6 +22,6 @@ test_script:
 environment:
   matrix:
     - ruby_version: "27-x64"
-      PGVER: 13
+      PGVER: 14
     - ruby_version: "24"
       PGVER: 10
