@@ -1,4 +1,9 @@
-## FEATURES:
+# Postgresql Ldap Sync
+
+### Overview
+With this Application, you can provide automatic ldap sync to your postgresql architectures installed on operating systems such as Red hat, Centos, rockey linux, Oracle linux.
+
+### How to use
 
 * Configurable per YAML config file
 * Can use Active Directory as LDAP-Server
@@ -7,121 +12,139 @@
 * Test mode which doesn't do any changes to the DBMS
 * Both LDAP and PG connections can be secured by SSL/TLS
 
-## REQUIREMENTS:
+### Requirements
 
 * Ruby-2.0+, JRuby-1.2+
 * LDAP-v3 server
 * PostgreSQL-server v9.0+
+* Oracle-Linux/Centos/Rhel/RockyLinux 
 
-## INSTALL:
+### Installation
 
-Install Ruby:
+```bash
+  $ yum install -y ruby rubygem-rake rubygems ruby-devel openldap-clients git wget tar curl make  rubygem-bigdecimal.x86_64 redhat-rpm-config libpq-devel.x86_64 gcc nano
+  ```
+  ```
+  $ git clone https://github.com/rkazak07/Postgresql-ldap-sync.git
+  ```
+  ```bash
+  $ cd Postgresql-ldap-sync
+  ```
+  ```bash
+  $ gem install bundler
+  ```
+  ```bash
+  $ bundle install
+  ```
+  ```bash
+  $ bundle exec rake install
+  ```
+  ```bash
+  $ gem install json
+  ```
+  ```bash
+  $ which pg_ldap_sync
+  ```
 
-* on Oracle-Linux8/Centos8/Rhel8/RockyLinux8: 
 
-### Install from Git:
-```sh
-  yum install -y ruby rubygem-rake rubygems ruby-devel openldap-clients git wget tar curl make  rubygem-bigdecimal.x86_64 redhat-rpm-config libpq-devel.x86_64 gcc nano
-  git clone https://github.com/rkazak07/Oracle-Linux8-Postgresql-13-ldap-sync.git
-  cd Oracle-Linux8-Postgresql-13-ldap-sync
-  gem install bundler
-  bundle install
-  bundle exec rake install
-  gem install json
-  which pg_ldap_sync
-```
-
-
-## POSTGRESQL13:
+## Postgresql
 We add roles for groups and users in Postgresql.
-```sh
-   sudo -su postgres psql
+ ```bash
+  $ sudo -su postgres psql
  ```
-   ```sh
-   create role ldap_users;
+ ```bash
+  $ create role ldap_users;
    ```
-   ```sh
-   create role ldap_groups;
+ ```bash
+  $ create role ldap_groups;
    ```
-   ```sh
-  \du
+ ```bash
+   \du
  ```
  
- ## USAGE:
+ ## Usage
 
 Create a config file based on
-[config/pg-ldap-sync-config.yaml](https://github.com/rkazak07/Oracle-Linux8-Postgresql-13-ldap-sync/config/pg-ldap-sync.yaml)
+[config/pg-ldap-sync-config.yaml](https://github.com/rkazak07/Postgresql-ldap-sync/config/pg-ldap-sync.yaml)
 
 Run in test-mode:
-```sh
-  pg_ldap_sync -c my_config.yaml -vv -t
+```bash
+  $ pg_ldap_sync -c my_config.yaml -vv -t
 ```
 Run in modify-mode:
-```sh
-  pg_ldap_sync -c my_config.yaml -vv
+```bash
+  $ pg_ldap_sync -c my_config.yaml -vv
 ```
  
  
- ## CHECK:
+ ## Check
  Check whether the users taken from the active directory are written to Postgresql. If users appear in roles when you run the below command, they have been successfully added.
- ```sh
- sudo -su postgres psql
+ ```bash
+ $ sudo -su postgres psql
  ```
- ```sh
+ ```bash
   \du
  ```
  
- ## LDAP TEST:
- ```sh
- ldapsearch -x -h ad-host-ip -D "pgadsync@domain.local" -W "(sAMAccountName=*)" -b "OU=pgusers,OU=Service_Users,OU=organization-unit,DC=domain,DC=local"  | grep    sAMAccountName
+### Ldap Test
+ ```bash
+ $ ldapsearch -x -h ad-host-ip -D "pgadsync@domain.local" -W "(sAMAccountName=*)" -b "OU=pgusers,OU=Service_Users,OU=organization-unit,DC=domain,DC=local"  | grep    sAMAccountName
  ```
-## EXAMPLE:
-```sh
+> Ldap Example
+> 
 #filter: (sAMAccountName=*)
 sAMAccountName: user1
 sAMAccountName: user2
-```
 
-## PG_HBA.CONF EDIT:
+
+### POSTGRESQL
+> Postgresql pg_hba.conf add  ldap sync parameters 
 ```sh
-nano /var/lib/pgsql/13/data/pg_hba.conf
+$ nano /var/lib/pgsql/13/data/pg_hba.conf
 ```
-```sh
 host    all             all             0.0.0.0/0               ldap ldapserver=domain-host ldapport=389 ldapprefix=""  ldapsuffix="@domain.local" ldapscheme=ldap
 ```
-```sh
-systemctl restart postgresql-13
+$ systemctl restart postgresql-14
 ```
 
-## POSTGRESQL:
-Now we are setting the user that will create the roles and authorizations between postgresql' and AD from the users we have added to the database.
-```sh
- create role "user1" superuser createdb createrole;
+> Now we are setting the user that will create the roles and authorizations between postgresql' and AD from the users we have added to the database.
+> 
+```bash
+  $ sudo -su postgres psql
+```
+```bash
+$ create role "user1" superuser createdb createrole;
  ```
- If we are going to create a user from existing ones, we are changing its authority
- ```sh
- alter role "user1" superuser createdb createrole;
+> If we are going to create a user from existing ones, we are changing its authority
+ ```bash
+$ alter role "user1" superuser createdb createrole;
  ```
- We will authorize the pggroup we created via AD to postgres.
- ```sh
- drop role pggroup; 
- create role pggroup in role ldap_groups;
- grant CONNECT ON DATABASE postgres to pggroup;
+> We will authorize the pggroup we created via AD to postgres.
+ 
+ ```bash
+ $ drop role pggroup;
  ```
- Postgresql Database Ldap Login Control
-  ```sh
- psql -h db-host-ip -U "ldapuser" -d postgres
+ ```bash
+ $ create role pggroup in role ldap_groups;
+ ```
+ ```bash
+ $ grant CONNECT ON DATABASE postgres to pggroup;
+ ```
+ 
+> Postgresql Database Ldap Login Control
+  ```bash
+ $ psql -h db-host-ip -U "ldapuser" -d postgres
  ```
 
-## CRONJOB:
-We need to create a cronjob so that the pg-ldap-sync.yaml file we created can pull the users added to the pggroup via AD in certain periods.
-## Example:
-```sh
- sudo yum -y install crontabs
+### CRONJOB:
+> We need to create a cronjob so that the pg-ldap-sync.yaml file we created can pull the users added to the pggroup via AD in certain periods.
+> 
+```bash
+ $ sudo yum -y install crontabs
  crontab -e
  ```
  We specify pg-ldap-sync and its runtime to the crontab.
- ```sh
- crontab -e
+ ```bash
+ $ crontab -e
  ```
  
