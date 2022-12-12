@@ -11,7 +11,7 @@ ldap_connection:
   port: 389
   auth:
     method: :simple
-    username: CN=pgadsync,OU=Service_Users,OU=organization-unit,DC=sample,DC=infra
+    username: CN=pgadsync,OU=Service_Users,OU=organization-unit,DC=sample,DC=local
     password: 123123Aa
 #  encryption:
  #   method: :simple_tls
@@ -32,7 +32,7 @@ ldap_users:
 
 # Search parameters for LDAP groups which should be synchronized
 ldap_groups:
-  base: OU=Service_Users,OU=organization-unit,DC=sample,DC=infraOU=Bib,DC=bib,DC=infra
+  base: OU=Service_Users,OU=organization-unit,DC=sample,DC=local
   filter: (cn=pggroup)
   # this attribute is used as PG role name
   name_attribute: cn
