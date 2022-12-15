@@ -1,7 +1,7 @@
 # Postgresql Ldap Sync
 
 ### Overview
-With this Application, you can provide automatic ldap sync to your postgresql architectures installed on operating systems such as Red hat, Centos, rockey linux, Oracle linux.
+With this Application, you can provide automatic ldap sync to your postgresql architectures installed on operating systems such as RedHat, Centos, Rocky linux, Oracle Linux.
 
 ### How to use
 
