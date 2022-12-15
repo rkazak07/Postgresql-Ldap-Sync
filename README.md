@@ -141,7 +141,6 @@ $ alter role "user1" superuser createdb createrole;
 > 
 ```bash
  $ sudo yum -y install crontabs
- crontab -e
  ```
  We specify pg-ldap-sync and its runtime to the crontab.
  ```bash
